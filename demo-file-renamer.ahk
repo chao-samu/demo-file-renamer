@@ -15,6 +15,14 @@
 #NoTrayIcon
 SendMode Input
 SetWorkingDir %A_ScriptDir%
+If %A_PtrSize% = 4
+{
+BitVersion := "x86"
+}
+else
+{
+BitVersion := "x64"
+}
 PrgVersion := "1.00 (AHK)"
 PrgName := "Demo file rename tool"
 
@@ -65,7 +73,7 @@ return
 MenuAbout:
 Gui, About:+owner1
 Gui +Disabled
-Gui, About:Add, Link,, %PrgName% - Version %PrgVersion% `n`nTool compiled with: AHK %A_AhkVersion% `n`nLook for updates:`n<a href="https://github.com/chao-samu">https://github.com/chao-samu</a>`n`nMade by chao-samu
+Gui, About:Add, Link,, %PrgName% - Version %PrgVersion% `n`nTool compiled with: AHK %A_AhkVersion% %BitVersion% `n`nLook for updates:`n<a href="https://github.com/chao-samu">https://github.com/chao-samu</a>`n`nMade by chao-samu
 Gui, About:Add, Button, Default, OK
 Gui, About:Show, w250 h150, About
 return
