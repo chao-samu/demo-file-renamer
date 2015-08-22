@@ -15,16 +15,16 @@
 #NoTrayIcon
 SendMode Input
 SetWorkingDir %A_ScriptDir%
-If %A_PtrSize% = 4
+PrgName := "Demo file renamer"
+PrgVersion := "1.00 (AHK)"
+If (A_PtrSize = 4)
 {
-BitVersion := "x86"
+	BitVersion := "x86"
 }
 else
 {
-BitVersion := "x64"
+	BitVersion := "x64"
 }
-PrgVersion := "1.00 (AHK)"
-PrgName := "Demo file rename tool"
 
 
 Menu, helpmenu, Add, Help , MenuHelp
