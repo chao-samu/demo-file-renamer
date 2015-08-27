@@ -3,7 +3,7 @@
 
 #  ===================================================================================
 #  Python Version ......: 3+
-#  Version .............: 1.00 (Python)
+#  Version .............: 1.00-beta (Python)
 #  Release Date ........: 2015-08-27
 #  GitHub ..............: https://github.com/chao-samu/demo-file-renamer
 #  Author ..............: chao-samu
@@ -28,7 +28,7 @@ print(PrgName + " - Version " + PrgVersion + " - made by chao-samu\nRenaming Mas
 
 root = Tk()
 root.withdraw()
-working_dir = filedialog.askdirectory(initialdir=r'C:\Users\Samurai\Desktop\Phyton')
+working_dir = filedialog.askdirectory()
 os.chdir(working_dir)
 
 
