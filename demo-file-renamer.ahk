@@ -245,7 +245,7 @@ if ErrorLevel=0
 			}
 			
 			counter_successfully := counter_files - counter_failed
-			logfile_path := A_WorkingDir . "\" . logfile_name
+			logfile_path := A_ScriptDir . "\" . logfile_name
 			msgbox % counter_successfully " out of " counter_files " files were successfully renamed. `n" "There are " counter_failed " that aren't renamed. `n`nLogfile is generated, please look for further information in logfile: `n" logfile_path
 		}
 		else
