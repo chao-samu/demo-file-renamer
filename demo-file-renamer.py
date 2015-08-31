@@ -20,7 +20,7 @@ import re, os, os.path, glob, string
 
 
 
-PrgName = "Demo file rename tool"
+PrgName = "Demo file renamer"
 PrgVersion = "1.00-beta (Python)"
 print(PrgName + " - Version " + PrgVersion + " - made by chao-samu\nRenaming Mask: OLDNAME_MAPNAME\nExample: 'samu-vs-ninja.dem' will be renamed to 'samu-vs-ninja_de_dust2.dem'")
 

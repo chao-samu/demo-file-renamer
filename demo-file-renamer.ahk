@@ -7,7 +7,7 @@
 ;------------------------------------------------------------------------------------
 ; Script Name..........: demo file renamer
 ; Description .........: Integrate mapname into demofile (*.dem).
-;						 Support: TF2, CS 1.6, CS:S and CS:GO
+;                        Support: TF2, CS 1.6, CS:S and CS:GO
 ; License..............: MIT License (https://github.com/chao-samu/demo-file-renamer/blob/master/LICENSE)
 ; ===================================================================================
 
