@@ -1,7 +1,7 @@
 ﻿; ===================================================================================
 ; AHK Version .........: 1.1.22.04
-; Version .............: 1.00 (AHK)
-; Release Date ........: 2015-08-22
+; Version .............: 1.01 (AHK)
+; Release Date ........: 2015-09-01
 ; GitHub ..............: https://github.com/chao-samu/demo-file-renamer
 ; Author ..............: chao-samu
 ;------------------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 PrgName := "Demo file renamer"
-PrgVersion := "1.00 (AHK)"
+PrgVersion := "1.01 (AHK)"
 If (A_PtrSize = 4)
 {
 	BitVersion := "x86"

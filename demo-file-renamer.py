@@ -3,8 +3,8 @@
 
 #  ===================================================================================
 #  Python Version ......: 3+
-#  Version .............: 1.00-beta (Python)
-#  Release Date ........: 2015-08-27
+#  Version .............: 1.01-beta (Python)
+#  Release Date ........: 2015-09-01
 #  GitHub ..............: https://github.com/chao-samu/demo-file-renamer
 #  Author ..............: chao-samu
 # ------------------------------------------------------------------------------------
@@ -21,7 +21,7 @@ import re, os, os.path, glob, string
 
 
 PrgName = "Demo file renamer"
-PrgVersion = "1.00-beta (Python)"
+PrgVersion = "1.01-beta (Python)"
 print(PrgName + " - Version " + PrgVersion + " - made by chao-samu\nRenaming Mask: OLDNAME_MAPNAME\nExample: 'samu-vs-ninja.dem' will be renamed to 'samu-vs-ninja_de_dust2.dem'")
 
 
