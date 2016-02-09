@@ -1,7 +1,7 @@
 ﻿; ===================================================================================
 ; AHK Version .........: 1.1.22.04
-; Version .............: 1.01 (AHK)
-; Release Date ........: 2015-09-01
+; Version .............: 1.02 (AHK)
+; Release Date ........: 2016-02-09
 ; GitHub ..............: https://github.com/chao-samu/demo-file-renamer
 ; Author ..............: chao-samu
 ;------------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ Gui, Add, ListBox, x12 y30 w290 h30 vRenamingMask AltSubmit gpressListBox, OLDNA
 Gui, Add, Text, x12 y10 w290 h20 , Choose renaming mask
 Gui, Add, Text, x12 y70 w290 h40 vtext_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "samurai-vs-ninja_de_dust2.dem"
 
-Gui, Add, Progress, x12 y140 w290 h10 Backgroundsilver vProgressBar 
+Gui, Add, Progress, x12 y140 w290 h10 Backgroundsilver vProgressBar
 ; Generated using SmartGUI Creator for SciTE
 Gui, Show, w323 h221, %PrgName%
 return
@@ -85,7 +85,7 @@ AboutButtonOK:
 AboutGuiClose:
 AboutGuiEscape:
 Gui, 1:-Disabled
-Gui Destroy 
+Gui Destroy
 return
 
 pressListBox:
@@ -93,7 +93,7 @@ pressListBox:
 	if (RenamingMask = 1)
 	GuiControl,, text_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "samurai-vs-ninja_de_dust2.dem"
 	else if (RenamingMask = 2)
-	GuiControl,, text_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "de_dust2_samurai-vs-ninja.dem"	
+	GuiControl,, text_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "de_dust2_samurai-vs-ninja.dem"
 	else if (RenamingMask = 3)
 	GuiControl,, text_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "2007-05-03_de_dust2_samurai-vs-ninja.dem"
 	else
@@ -114,16 +114,16 @@ GuiControl, Disable, RenamingMask
 GuiControlGet, RenamingMask
 FileSelectFolder, folder_demofiles,, 0, Please select your folder where your demofiles are. `nAll files with the ending *.dem will be renamed.
 if ErrorLevel=0
-{	
+{
 	SetWorkingDir %folder_demofiles%
 	Loop, Files, *.dem
 	{
-		counter_files += 1  
+		counter_files += 1
 	}
 	If counter_files ;not empty or zero
-	{		
+	{
 		counter_files_quotient := 100 / counter_files
-		
+
 		if (RenamingMask = 1)
 		{
 			Loop, Files, *.dem
@@ -136,8 +136,13 @@ if ErrorLevel=0
 				If (InStr(mapstring, "maps") and InStr(mapstring, "bsp"))
 				{
 					RegExMatch(mapstring, "(?<=maps[\/\\]).+(?=\.bsp)", Mapname)
+					Mapname := Format("{1:s}", Mapname)
+					If (InStr(Mapname, "/") or InStr(Mapname, "\"))
+					{
+						Mapname := RegExReplace(Mapname, ".+[\/\\]", "")
+					}
 					SplitPath, A_LoopFileName,,,, FileNameNoExt
-					filelist := filelist . A_LoopFileName . "`t" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"				
+					filelist := filelist . A_LoopFileName . "`t" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
 				}
 				else
 				{
@@ -158,8 +163,13 @@ if ErrorLevel=0
 				If (InStr(mapstring, "maps") and InStr(mapstring, "bsp"))
 				{
 					RegExMatch(mapstring, "(?<=maps[\/\\]).+(?=\.bsp)", Mapname)
+					Mapname := Format("{1:s}", Mapname)
+					If (InStr(Mapname, "/") or InStr(Mapname, "\"))
+					{
+						Mapname := RegExReplace(Mapname, ".+[\/\\]", "")
+					}
 					SplitPath, A_LoopFileName,,,, FileNameNoExt
-					filelist := filelist . A_LoopFileName . "`t" . Mapname . "_" .  FileNameNoExt . "." . A_LoopFileExt . "`n"	
+					filelist := filelist . A_LoopFileName . "`t" . Mapname . "_" .  FileNameNoExt . "." . A_LoopFileExt . "`n"
 				}
 				else
 				{
@@ -180,9 +190,14 @@ if ErrorLevel=0
 				If (InStr(mapstring, "maps") and InStr(mapstring, "bsp"))
 				{
 					RegExMatch(mapstring, "(?<=maps[\/\\]).+(?=\.bsp)", Mapname)
+					Mapname := Format("{1:s}", Mapname)
+					If (InStr(Mapname, "/") or InStr(Mapname, "\"))
+					{
+						Mapname := RegExReplace(Mapname, ".+[\/\\]", "")
+					}
 					SplitPath, A_LoopFileName,,,, FileNameNoExt
 					FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM-dd
-					filelist := filelist . A_LoopFileName . "`t" . mod_date . "_" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"				
+					filelist := filelist . A_LoopFileName . "`t" . mod_date . "_" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
 				}
 				else
 				{
@@ -203,9 +218,14 @@ if ErrorLevel=0
 				If (InStr(mapstring, "maps") and InStr(mapstring, "bsp"))
 				{
 					RegExMatch(mapstring, "(?<=maps[\/\\]).+(?=\.bsp)", Mapname)
+					Mapname := Format("{1:s}", Mapname)
+					If (InStr(Mapname, "/") or InStr(Mapname, "\"))
+					{
+						Mapname := RegExReplace(Mapname, ".+[\/\\]", "")
+					}
 					SplitPath, A_LoopFileName,,,, FileNameNoExt
 					FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM-dd
-					filelist := filelist . A_LoopFileName . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"				
+					filelist := filelist . A_LoopFileName . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
 				}
 				else
 				{
@@ -227,7 +247,7 @@ if ErrorLevel=0
 		{
 			logfile_name := "Demofile_renamer_logfile.txt"
 			logfile := "Renaming from " current_time " in " A_WorkingDir " `n`nThe following files aren't renamed because the map wasn't found in the demofile: `n`n" . filelist_failed . "`n`nWhat you can do: `n- Execute the demofile in your game or `n- Open the file in an editor and search for the word ""maps"" `n`nBe sure the demofile is a CS 1.6, CS:S, CS:GO or TF2 demofile."
-			
+
 			IfExist, %A_ScriptDir%\%logfile_name%
 			{
 			filetrue := "A"
@@ -243,7 +263,7 @@ if ErrorLevel=0
 			{
 				FileAppend, %logfile%, %A_ScriptDir%\%logfile_name%
 			}
-			
+
 			counter_successfully := counter_files - counter_failed
 			logfile_path := A_ScriptDir . "\" . logfile_name
 			msgbox % counter_successfully " out of " counter_files " files were successfully renamed. `n" "There are " counter_failed " that aren't renamed. `n`nLogfile is generated, please look for further information in logfile: `n" logfile_path
@@ -260,7 +280,7 @@ if ErrorLevel=0
 		return
 	}
 	else
-	{		
+	{
 		MsgBox % "No files found!"
 		GuiControl,, ProgressBar, 0
 		GuiControl, Enable, RenamingMask
