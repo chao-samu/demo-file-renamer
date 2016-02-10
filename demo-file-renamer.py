@@ -43,13 +43,13 @@ for file_source in demofiles:
             if mapname is not None:
                 break
     if mapname is not None:
-            mapname = mapname.group()
-            if '/' or '\\' in mapname:
-                mapname = re.sub(r".+[\/\\]", '', mapname)
-            mapname = ''.join([x for x in mapname if x in string.printable])
-            demoname, ext = os.path.splitext(file_source)
-            file_destination = demoname + "_" + mapname + ext
-            os.rename(file_source, file_destination)
+        mapname = mapname.group()
+        if '/' or '\\' in mapname:
+            mapname = re.sub(r".+[\/\\]", '', mapname)
+        mapname = ''.join([x for x in mapname if x in string.printable])
+        demoname, ext = os.path.splitext(file_source)
+        file_destination = demoname + "_" + mapname + ext
+        os.rename(file_source, file_destination)
     else:
         file_failed = file_failed + file_source + '\n'
 
