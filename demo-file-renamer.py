@@ -46,7 +46,6 @@ for file_source in demofiles:
             mapname = mapname.group()
             if '/' or '\\' in mapname:
                 mapname = re.sub(r".+[\/\\]", '', mapname)
-                print(mapname)
             mapname = ''.join([x for x in mapname if x in string.printable])
             demoname, ext = os.path.splitext(file_source)
             file_destination = demoname + "_" + mapname + ext
