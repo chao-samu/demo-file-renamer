@@ -16,7 +16,7 @@
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 PrgName := "Demo file renamer"
-PrgVersion := "1.01 (AHK)"
+PrgVersion := "1.02 (AHK)"
 If (A_PtrSize = 4)
 {
 	BitVersion := "x86"
