@@ -4,7 +4,7 @@
 #  ===================================================================================
 #  Python Version ......: 3.*
 #  Version .............: 1.06 (Python)
-#  Release Date ........: 2017-03-08
+#  Release Date ........: 2017-03-09
 #  GitHub ..............: https://github.com/chao-samu/demo-file-renamer
 #  Author ..............: chao-samu
 # ------------------------------------------------------------------------------------
@@ -165,9 +165,10 @@ class MainWindow(wx.Frame):
 
         if saveDirDialog.ShowModal() == wx.ID_OK:
             os.chdir(saveDirDialog.GetPath())
-            MTT = futures.ThreadPoolExecutor(max_workers=1) # check if correct implementated
-            MTT.submit(RenamingDemoFiles, self.ListSelection) # check if correct implementated
-            MTT.shutdown(False) # check if correct implementated
+            # MTT = futures.ThreadPoolExecutor(max_workers=1) # wrong implemented, needs a better solution
+            # MTT.submit(RenamingDemoFiles, self.ListSelection) # wrong implemented, needs a better solution
+            # MTT.shutdown(False) # wrong implemented, needs a better solution
+            RenamingDemoFiles(self.ListSelection)
             return
         else:
             return     # the user changed idea...
