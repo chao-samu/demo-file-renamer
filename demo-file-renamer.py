@@ -3,8 +3,8 @@
 
 #  ===================================================================================
 #  Python Version ......: 3.*
-#  Version .............: 1.06 (Python)
-#  Release Date ........: 2017-03-09
+#  Version .............: 1.07 (Python)
+#  Release Date ........: 2017-03-10
 #  GitHub ..............: https://github.com/chao-samu/demo-file-renamer
 #  Author ..............: chao-samu
 # ------------------------------------------------------------------------------------
@@ -14,14 +14,21 @@
 #  License..............: MIT License (https://github.com/chao-samu/demo-file-renamer/blob/master/LICENSE)
 #  ===================================================================================
 
-from concurrent import futures
-import datetime, glob, os, os.path, re, string, sys, textwrap, wx
+import wx
+import datetime, glob, os, os.path, re, string, sys, textwrap
 
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(345,320), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
         
-        # Variables
+        # programm variables
+        self.PrgName = title
+        self.PrgVersion = "v1.05"
+        self.PytonVersion = sys.version
+        self.WxVersion = wx.__version__
+        IconPath = "_ico" + os.sep + "Demofile Renamer.ico"
+        
+        # init variables
         self.ListSelection = 0
         textExample = 'Example:\n "samurai-vs-ninja.dem" will be renamed to\n "samurai-vs-ninja_de_dust2.dem"'
         
@@ -136,7 +143,7 @@ class MainWindow(wx.Frame):
 
     def OnAbout(self, event):
         # MessageDialog creation
-        MessageDlgText = PrgName + ":\n" + PrgVersion + "\n\nBased on Python version:\n" + PytonVersion + "\n\nGUI made with wxPython version:\n" + WxVersion + "\n\nMade by chao-samu" + "\nLook for updates: https://github.com/chao-samu"
+        MessageDlgText = self.PrgName + ":\n" + self.PrgVersion + "\n\nBased on Python version:\n" + self.PytonVersion + "\n\nGUI made with wxPython version:\n" + self.WxVersion + "\n\nMade by chao-samu" + "\nLook for updates: https://github.com/chao-samu"
         
         dlg = wx.MessageDialog( self, MessageDlgText, "License", wx.OK)
         dlg.ShowModal() # Show it
@@ -168,7 +175,7 @@ class MainWindow(wx.Frame):
             # MTT = futures.ThreadPoolExecutor(max_workers=1) # wrong implemented, needs a better solution
             # MTT.submit(RenamingDemoFiles, self.ListSelection) # wrong implemented, needs a better solution
             # MTT.shutdown(False) # wrong implemented, needs a better solution
-            RenamingDemoFiles(self.ListSelection)
+            DemoFileRenamer(self.ListSelection).start()
             return
         else:
             return     # the user changed idea...
@@ -213,90 +220,91 @@ class MainWindow(wx.Frame):
         dlg = wx.MessageDialog( self, MessageDlgText, "Error", wx.OK)       
         dlg.ShowModal() # Show it
         dlg.Destroy() # finally destroy it when finished.
-        
-def RenamingDemoFiles(ListSelection):
-    file_failed = ""
-    x = 0
-    file_failed_counter = 0
-    demofiles = glob.glob('*' + os.extsep + 'dem')
-    demofileCount = len(demofiles)
-    frame.GaugeProgress.SetRange(demofileCount)
-    StartSelect = frame.OnStartRenaming(demofileCount)
-    if StartSelect is not True:
-        return
-    frame.buttonStart.Disable()
-    frame.buttonCancel.Disable()
-    frame.ListBoxSelect.Disable()
-    print ("Files found: " + str(demofileCount) + "\nStarting renaming..." + "\nIn progress please wait...")
-    for file_source in demofiles:
-        with open(file_source, 'r', errors='ignore') as fobj:
-            for line in fobj:
-                mapname = re.search(r"(?<=maps[\/\\]).+(?=\.bsp)", line)
-                if mapname is not None:
-                    break
-        if mapname is not None:
-            mapname = mapname.group()
-            if '/' or '\\' in mapname:
-                mapname = re.sub(r".+[\/\\]", '', mapname)
-            mapname = ''.join([x for x in mapname if x in string.printable])
-            demoname, ext = os.path.splitext(file_source)
-            if ListSelection == 0:
-                file_destination = demoname + "_" + mapname + ext
-            elif ListSelection == 1:
-                file_destination = mapname + "_" + demoname + ext
-            elif ListSelection == 2:
-                dt = os.path.getmtime(file_source)
-                dt = datetime.datetime.fromtimestamp(dt).strftime('%Y-%m-%d')
-                file_destination = dt + "_" + mapname + "_" + demoname + ext
-            else:
-                dt = os.path.getmtime(file_source)
-                dt = datetime.datetime.fromtimestamp(dt).strftime('%Y-%m-%d')
-                file_destination = dt + "_" + demoname + "_" + mapname + ext
-            try:
-                os.rename(file_source, file_destination)
-            except OSError as e:
-                frame.OnError(e)               
-                print("OSError: {0}".format(e))
-                frame.buttonStart.Enable()
-                frame.buttonCancel.Enable()
-                frame.ListBoxSelect.Enable()
-                frame.GaugeProgress.SetValue(0)
-                return
-        else:           
-            file_failed = file_failed + file_source + '\n'
-            file_failed_counter += 1
-        x += 1
-        frame.GaugeProgress.SetValue(x)
-
-    if file_failed:
-        logfile_name = 'logfile_demo-file-renamer'
-        logfile_ext = os.extsep + 'txt'
-        logfile_text = """The following files aren't renamed because the map wasn't found in the demofile: \n\n""" + file_failed +  """\nWhat you can do: \n- Execute the demofile in your game or \n- Open the file in an editor and search for the word "maps" \n\nBe sure the demofile is a CS 1.6, CS:S, CS:GO or TF2 demofile."""
-        if os.path.isfile(logfile_name + logfile_ext):
-            logfile_counter = 2
-            logfile_name_check =  logfile_name + "(" + str(logfile_counter) + ")" + logfile_ext
-            while os.path.isfile(logfile_name_check) is True:
-                logfile_counter += 1
-                logfile_name_check =  logfile_name + "(" + str(logfile_counter) + ")" + logfile_ext
-            logfile = open(logfile_name_check, 'x').write(logfile_text)
-        else:
-            logfile = open(logfile_name + logfile_ext, 'x').write(logfile_text)
-        frame.OnFinishFailed(logfile_name, logfile_ext, file_failed_counter)
-        print("Files failed to rename: " + str(file_failed_counter) + " of " + str(demofileCount) + "\nLogfile is generated, please look for further information in logfile: \"" + os.getcwd() +  os.sep + logfile_name + logfile_ext + "\"")
-    else:
-        frame.OnFinish()
-        print("All files successfully renamed!")    
-    frame.buttonStart.Enable()
-    frame.buttonCancel.Enable()
-    frame.ListBoxSelect.Enable()
-    frame.GaugeProgress.SetValue(0)
+  
+class DemoFileRenamer():
+    def __init__(self, ListSelection):   
     
+        #variables
+        self.ListSelection = ListSelection
+      
+    def start(self):
+        file_failed = ""
+        x = 0
+        file_failed_counter = 0
+        demofiles = glob.glob('*' + os.extsep + 'dem')
+        demofileCount = len(demofiles)
+        frame.GaugeProgress.SetRange(demofileCount)
+        StartSelect = frame.OnStartRenaming(demofileCount)
+        if StartSelect is not True:
+            return
+        frame.buttonStart.Disable()
+        frame.buttonCancel.Disable()
+        frame.ListBoxSelect.Disable()
+        print ("Files found: " + str(demofileCount) + "\nStarting renaming..." + "\nIn progress please wait...")
+        for file_source in demofiles:
+            with open(file_source, 'r', errors='ignore') as fobj:
+                for line in fobj:
+                    mapname = re.search(r"(?<=maps[\/\\]).+(?=\.bsp)", line)
+                    if mapname is not None:
+                        break
+            if mapname is not None:
+                mapname = mapname.group()
+                if '/' or '\\' in mapname:
+                    mapname = re.sub(r".+[\/\\]", '', mapname)
+                mapname = ''.join([x for x in mapname if x in string.printable])
+                demoname, ext = os.path.splitext(file_source)
+                if self.ListSelection == 0:
+                    file_destination = demoname + "_" + mapname + ext
+                elif self.ListSelection == 1:
+                    file_destination = mapname + "_" + demoname + ext
+                elif self.ListSelection == 2:
+                    dt = os.path.getmtime(file_source)
+                    dt = datetime.datetime.fromtimestamp(dt).strftime('%Y-%m-%d')
+                    file_destination = dt + "_" + mapname + "_" + demoname + ext
+                else:
+                    dt = os.path.getmtime(file_source)
+                    dt = datetime.datetime.fromtimestamp(dt).strftime('%Y-%m-%d')
+                    file_destination = dt + "_" + demoname + "_" + mapname + ext
+                try:
+                    os.rename(file_source, file_destination)
+                except OSError as e:
+                    frame.OnError(e)               
+                    print("OSError: {0}".format(e))
+                    frame.buttonStart.Enable()
+                    frame.buttonCancel.Enable()
+                    frame.ListBoxSelect.Enable()
+                    frame.GaugeProgress.SetValue(0)
+                    return
+            else:           
+                file_failed = file_failed + file_source + '\n'
+                file_failed_counter += 1
+            x += 1
+            frame.GaugeProgress.SetValue(x)
 
-PrgName = "Demo file renamer"
-PrgVersion = "v1.05"
-PytonVersion = sys.version
-WxVersion = wx.__version__
-IconPath = r"_ico\Demofile Renamer.ico"
+        if file_failed:
+            logfile_name = 'logfile_demo-file-renamer'
+            logfile_ext = os.extsep + 'txt'
+            logfile_text = """The following files aren't renamed because the map wasn't found in the demofile: \n\n""" + file_failed +  """\nWhat you can do: \n- Execute the demofile in your game or \n- Open the file in an editor and search for the word "maps" \n\nBe sure the demofile is a CS 1.6, CS:S, CS:GO or TF2 demofile."""
+            if os.path.isfile(logfile_name + logfile_ext):
+                logfile_counter = 2
+                logfile_name_check =  logfile_name + "(" + str(logfile_counter) + ")" + logfile_ext
+                while os.path.isfile(logfile_name_check) is True:
+                    logfile_counter += 1
+                    logfile_name_check =  logfile_name + "(" + str(logfile_counter) + ")" + logfile_ext
+                logfile = open(logfile_name_check, 'x').write(logfile_text)
+            else:
+                logfile = open(logfile_name + logfile_ext, 'x').write(logfile_text)
+            frame.OnFinishFailed(logfile_name, logfile_ext, file_failed_counter)
+            print("Files failed to rename: " + str(file_failed_counter) + " of " + str(demofileCount) + "\nLogfile is generated, please look for further information in logfile: \"" + os.getcwd() +  os.sep + logfile_name + logfile_ext + "\"")
+        else:
+            frame.OnFinish()
+            print("All files successfully renamed!")    
+        frame.buttonStart.Enable()
+        frame.buttonCancel.Enable()
+        frame.ListBoxSelect.Enable()
+        frame.GaugeProgress.SetValue(0)
+
+# wxPython window loop
 app = wx.App(False)
-frame = MainWindow(None, PrgName)
+frame = MainWindow(None, "Demo file renamer")
 app.MainLoop()
