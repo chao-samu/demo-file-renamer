@@ -1,7 +1,7 @@
 ﻿; ===================================================================================
-; AHK Version .........: 1.1.24.01
-; Version .............: 1.04 (AHK)
-; Release Date ........: 2016-09-23
+; AutoHotkey Version ..: 1.1.*
+; Version .............: 1.05 (AHK)
+; Release Date ........: 2017-04-04
 ; GitHub ..............: https://github.com/chao-samu/demo-file-renamer
 ; Author ..............: chao-samu
 ;------------------------------------------------------------------------------------
@@ -18,70 +18,75 @@ SetWorkingDir %A_ScriptDir%
 
 ;############################### Programm Info ###############################
 PrgName := "demo file renamer"
-PrgVersion := "1.04 (AHK)"
+PrgVersion := "1.05 (AHK)"
 
 ;############################### OS Detections ###############################
 If (A_PtrSize = 4)
 {
-	BitVersion := "x86"
+    BitVersion := "x86"
 }
 else
 {
-	BitVersion := "x64"
+    BitVersion := "x64"
 }
 
 ;############################### Functions ###############################
 ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
 {
-	Loop, Files, *.dem
-	{
-		counter_prog := counter_files_quotient * A_Index
-		GuiControl,, ProgressBar, %counter_prog%
-		mapstring := ""
-		File := FileOpen(A_LoopFileName, "r")
-		while !File.AtEOF
-		{
-			demofile := File.ReadLine()		
-			RegExMatch(demofile, "maps[\/\\].+\.bsp", mapstring)
-		If mapstring
-		{
-			File.Close()
-			mapstring_formated := Format("{1:s}", mapstring)			
-			continue
-		}
-		}
-		If (InStr(mapstring_formated, "maps") and InStr(mapstring_formated, "bsp"))
-		{
-		RegExMatch(mapstring_formated, "(?<=maps[\/\\]).+(?=\.bsp)", Mapname)
-		Mapname := Format("{1:s}", Mapname)
-			If (InStr(Mapname, "/") or InStr(Mapname, "\"))
-			{
-				Mapname := RegExReplace(Mapname, ".+[\/\\]", "")
-			}
-			SplitPath, A_LoopFileName,,,, FileNameNoExt
-			If (RenamingMaskNumber = 3) or (RenamingMaskNumber = 4)
-			{
-				FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM-dd
-			}
-			RenamingMask := []
-			RenamingMask[1] := filelist . A_LoopFileName . "`t" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
-			RenamingMask[2] := filelist . A_LoopFileName . "`t" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
-			RenamingMask[3] := filelist . A_LoopFileName . "`t" . mod_date . "_" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
-			RenamingMask[4] := filelist . A_LoopFileName . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
-			filelist := RenamingMask[RenamingMaskNumber]
-		}
-		else
-		{
-			filelist_failed := filelist_failed . A_LoopFileName . "`n"
-			counter_failed += 1
-		}
-	}
-	return [filelist, filelist_failed, counter_failed]
+    Loop, Files, *.dem
+    {
+
+        counter_prog := counter_files_quotient * A_Index
+        GuiControl,, ProgressBar, %counter_prog%
+        mapstring := ""
+        mapstring_formated := ""
+        File := FileOpen(A_LoopFileName, "r")
+        while !File.AtEOF
+        {
+            demofile := File.ReadLine()
+            RegExMatch(demofile, "maps[\/\\].+\.bsp", mapstring)
+            If mapstring
+            {
+                File.Close()
+                mapstring_formated := Format("{1:s}", mapstring)
+                continue
+            }
+        }
+
+        If (InStr(mapstring_formated, "maps") and InStr(mapstring_formated, "bsp"))
+        {
+            RegExMatch(mapstring_formated, "(?<=maps[\/\\]).+(?=\.bsp)", Mapname) ;regex lookahead and lookbehind
+            Mapname := Format("{1:s}", Mapname)
+            If (InStr(Mapname, "/") or InStr(Mapname, "\"))
+            {
+                Mapname := RegExReplace(Mapname, ".+[\/\\]", "")
+            }
+            SplitPath, A_LoopFileName,,,, FileNameNoExt
+            If (RenamingMaskNumber = 3) or (RenamingMaskNumber = 4)
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM-dd
+            }
+            RenamingMask := []
+            RenamingMask[1] := filelist . A_LoopFileName . "`t" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
+            RenamingMask[2] := filelist . A_LoopFileName . "`t" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
+            RenamingMask[3] := filelist . A_LoopFileName . "`t" . mod_date . "_" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
+            RenamingMask[4] := filelist . A_LoopFileName . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
+            filelist := RenamingMask[RenamingMaskNumber]
+        }
+        else
+        {
+            filelist_failed := filelist_failed . A_LoopFileName . "`n"
+            counter_failed += 1
+        }
+
+    }
+    return [filelist, filelist_failed, counter_failed]
 }
 
 ;############################### GUI ###############################
 Menu, helpmenu, Add, Help , MenuHelp
 Menu, helpmenu, Add
+Menu, helpmenu, Add, License, MenuLicense
 Menu, helpmenu, Add, About, MenuAbout
 Menu, topmenu, Add, &Help, :helpmenu
 Gui, Menu, topmenu
@@ -102,7 +107,7 @@ MenuHelp:
 Gui, Help:+owner1
 Gui +Disabled
 Gui, Help:Add, Text,,
-((
+(
 What can do this Tool?
 This tool was manly made to extract out the mapname of
 GoldSrc- and Source Engine demofiles and place it in the name of the demofile itself.
@@ -123,19 +128,14 @@ Gui, Help:Add, Button, Default, OK
 Gui, Help:Show, w450 h240, Help
 return
 
-MenuAbout:
-Gui, About:+owner1
+MenuLicense:
+Gui, License:+owner1
 Gui +Disabled
-Gui, About:Add, Link,, %PrgName% - Version %PrgVersion% `n`nTool compiled with: AHK %A_AhkVersion% %BitVersion% `n`nLook for updates:`n<a href="https://github.com/chao-samu">https://github.com/chao-samu</a>`n`nMade by chao-samu
-Gui, About:Add, Text, r9 vMeinEdit, 
+Gui, License:Add, Text, r9 vMeinEdit,
 (
-
-:::::::::::::::::::::::::::::::::::::::::This software is provided under the following License:::::::::::::::::::::::::::::::::::::::::
----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 The MIT License (MIT)
 
-Copyright (c) 2015 chao-samu
+Copyright (c) 2017 chao-samu
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -155,9 +155,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 )
-Gui, About:Add, Button, Default, OK
-Gui, About:Show, w540 h490, About
+Gui, License:Add, Button, Default, OK
+Gui, License:Show, w540 h320, License
 return
+
+MenuAbout:
+Gui, About:+owner1
+Gui +Disabled
+Gui, About:Add, Link,, %PrgName% - Version %PrgVersion% `n`nTool compiled with: AHK %A_AhkVersion% %BitVersion% `n`nLook for updates:`n<a href="https://github.com/chao-samu">https://github.com/chao-samu</a>`n`nMade by chao-samu
+Gui, About:Add, Button, Default, OK
+Gui, About:Show, w250 h150, About
+return
+
 
 HelpButtonOK:
 HelpGuiClose:
@@ -165,21 +174,28 @@ HelpGuiEscape:
 AboutButtonOK:
 AboutGuiClose:
 AboutGuiEscape:
+LicenseButtonOK:
+LicenseGuiClose:
+LicenseGuiEscape:
 Gui, 1:-Disabled
 Gui Destroy
 return
 
 pressListBox:
-	Gui, Submit, NoHide
-	if (RenamingMaskNumber = 1)
-	GuiControl,, text_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "samurai-vs-ninja_de_dust2.dem"
-	else if (RenamingMaskNumber = 2)
-	GuiControl,, text_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "de_dust2_samurai-vs-ninja.dem"
-	else if (RenamingMaskNumber = 3)
-	GuiControl,, text_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "2007-05-03_de_dust2_samurai-vs-ninja.dem"
-	else
-	GuiControl,, text_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "2007-05-03_samurai-vs-ninja_de_dust2.dem"
+    Gui, Submit, NoHide
+    if (RenamingMaskNumber = 1)
+    GuiControl,, text_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "samurai-vs-ninja_de_dust2.dem"
+    else if (RenamingMaskNumber = 2)
+    GuiControl,, text_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "de_dust2_samurai-vs-ninja.dem"
+    else if (RenamingMaskNumber = 3)
+    GuiControl,, text_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "2007-05-03_de_dust2_samurai-vs-ninja.dem"
+    else
+    GuiControl,, text_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "2007-05-03_samurai-vs-ninja_de_dust2.dem"
 return
+
+ButtonCancel:
+GuiClose:
+ExitApp
 
 ;############################### MAIN Programm ###############################
 ButtonStart:
@@ -198,80 +214,76 @@ GuiControlGet, RenamingMaskNumber
 FileSelectFolder, folder_demofiles,, 0, Please select your folder where your demofiles are. `nAll files with the ending *.dem will be renamed.
 if ErrorLevel=0
 {
-	SetWorkingDir %folder_demofiles%
-	Loop, Files, *.dem
-	{
-		counter_files += 1
-	}
-	If counter_files
-	{
-		counter_files_quotient := 100 / counter_files
-		ParsingInfo := ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
-		filelist := ParsingInfo[1]
-		filelist_failed := ParsingInfo[2]
-		counter_failed := ParsingInfo[3]
-		GuiControl, Disable, Cancel
-		GuiControl,, text_prog, Renaming Files
-		Loop, Parse, filelist, `n
-		{
-			 filelist_array := StrSplit(A_LoopField, A_Tab)
-			 Source := filelist_array[1]
-			 Destination := filelist_array[2]
-			 FileMove, %Source%, %Destination%
-		}
-		If filelist_failed
-		{
-			logfile_name := "demo-file-renamer_logfile.txt"
-			logfile := "Renaming from " current_time " in " A_WorkingDir " `n`nThe following files aren't renamed because the map wasn't found in the demofile: `n`n" . filelist_failed . "`n`nWhat you can do: `n- Execute the demofile in your game or `n- Open the file in an editor and search for the word ""maps"" `n`nBe sure the demofile is a CS 1.6, CS:S, CS:GO or TF2 demofile."
-			IfExist, %A_ScriptDir%\%logfile_name%
-			{
-			filetrue := "A"
-				while filetrue
-				{
-				logfile_counter +=1
-				logfile_name := "demo-file-renamer_logfile(" . logfile_counter . ").txt"
-				filetrue := FileExist(A_ScriptDir . "\" . logfile_name)
-				}
-				FileAppend, %logfile%, %A_ScriptDir%\%logfile_name%
-			}
-			else
-			{
-				FileAppend, %logfile%, %A_ScriptDir%\%logfile_name%
-			}
+    SetWorkingDir %folder_demofiles%
+    Loop, Files, *.dem
+    {
+        counter_files += 1
+    }
+    If counter_files
+    {
+        counter_files_quotient := 100 / counter_files
+        ParsingInfo := ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
+        filelist := ParsingInfo[1]
+        filelist_failed := ParsingInfo[2]
+        counter_failed := ParsingInfo[3]
+        GuiControl, Disable, Cancel
+        GuiControl,, text_prog, Renaming Files
+        Loop, Parse, filelist, `n
+        {
+             filelist_array := StrSplit(A_LoopField, A_Tab)
+             Source := filelist_array[1]
+             Destination := filelist_array[2]
+             FileMove, %Source%, %Destination%
+        }
+        If filelist_failed
+        {
+            logfile_name := "demo-file-renamer_logfile.txt"
+            logfile := "Renaming from " current_time " in " A_WorkingDir " `n`nThe following files aren't renamed because the map wasn't found in the demofile: `n`n" . filelist_failed . "`n`nWhat you can do: `n- Execute the demofile in your game or `n- Open the file in an editor and search for the word ""maps"" `n`nBe sure the demofile is a CS 1.6, CS:S, CS:GO or TF2 demofile."
+            IfExist, %A_ScriptDir%\%logfile_name%
+            {
+                filetrue := "A"
+                while filetrue
+                {
+                    logfile_counter +=1
+                    logfile_name := "demo-file-renamer_logfile(" . logfile_counter . ").txt"
+                    filetrue := FileExist(A_ScriptDir . "\" . logfile_name)
+                }
+                FileAppend, %logfile%, %A_ScriptDir%\%logfile_name%
+            }
+            else
+            {
+                FileAppend, %logfile%, %A_ScriptDir%\%logfile_name%
+            }
 
-			counter_successfully := counter_files - counter_failed
-			logfile_path := A_ScriptDir . "\" . logfile_name
-			msgbox % counter_successfully " out of " counter_files " files were successfully renamed. `n" "There are " counter_failed " that aren't renamed. `n`nLogfile is generated, please look for further information in logfile: `n" logfile_path
-		}
-		else
-		{
-			MsgBox, 0, , All demofiles successfully renamed!
-		}
-		GuiControl,, ProgressBar, 0
-		GuiControl,, text_prog, Extracting mapname
-		GuiControl, Enable, RenamingMaskNumber
-		GuiControl, Enable, Cancel
-		GuiControl, Enable, Start
-		return
-	}
-	else
-	{
-		MsgBox % "No files found!"
-		GuiControl,, ProgressBar, 0
-		GuiControl, Enable, RenamingMaskNumber
-		GuiControl, Enable, Cancel
-		GuiControl, Enable, Start
-		return
-	}
+            counter_successfully := counter_files - counter_failed
+            logfile_path := A_ScriptDir . "\" . logfile_name
+            msgbox % counter_successfully " out of " counter_files " files were successfully renamed. `n" "There are " counter_failed " that aren't renamed. `n`nLogfile is generated, please look for further information in logfile: `n" logfile_path
+        }
+        else
+        {
+            MsgBox, 0, , All demofiles successfully renamed!
+        }
+        GuiControl,, ProgressBar, 0
+        GuiControl,, text_prog, Extracting mapname
+        GuiControl, Enable, RenamingMaskNumber
+        GuiControl, Enable, Cancel
+        GuiControl, Enable, Start
+        return
+    }
+    else
+    {
+        MsgBox % "No files found!"
+        GuiControl,, ProgressBar, 0
+        GuiControl, Enable, RenamingMaskNumber
+        GuiControl, Enable, Cancel
+        GuiControl, Enable, Start
+        return
+    }
 }
 else
 {
-	GuiControl,, ProgressBar, 0
-	GuiControl, Enable, RenamingMaskNumber
-	GuiControl, Enable, Start
-	return
+    GuiControl,, ProgressBar, 0
+    GuiControl, Enable, RenamingMaskNumber
+    GuiControl, Enable, Start
+    return
 }
-
-ButtonCancel:
-GuiClose:
-ExitApp
