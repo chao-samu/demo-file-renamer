@@ -1,6 +1,6 @@
 ﻿; ===================================================================================
 ; AutoHotkey Version ..: 1.1.*
-; Version .............: 1.07 (AHK)
+; Version .............: 1.08 (AHK)
 ; Release Date ........: 2017-04-07
 ; GitHub ..............: https://github.com/chao-samu/demo-file-renamer
 ; Author ..............: chao-samu
@@ -18,7 +18,7 @@ SetWorkingDir %A_ScriptDir%
 
 ;############################### Programm Info ###############################
 PrgName := "demo file renamer"
-PrgVersion := "1.07 (AHK)"
+PrgVersion := "1.08 (AHK)"
 
 ;############################### OS Detections ###############################
 If (A_PtrSize = 4)
@@ -129,7 +129,7 @@ ParsingFullDemofiles(RenamingMaskNumber, counter_files_quotient)
                 If !arraypos
                 {
                     ; MsgBox % "Mapname: " . Mapname . " needle: " . needle . " arraypos: " . arraypos "`n if"
-                    Mapname.InsertAt(1,needle)
+                    Mapname.Push(needle)
                 }
             }
         }
