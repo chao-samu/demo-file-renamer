@@ -1,7 +1,7 @@
 ﻿; ===================================================================================
 ; AutoHotkey Version ..: 1.1.*
-; Version .............: 1.05 (AHK)
-; Release Date ........: 2017-04-04
+; Version .............: 1.07 (AHK)
+; Release Date ........: 2017-04-07
 ; GitHub ..............: https://github.com/chao-samu/demo-file-renamer
 ; Author ..............: chao-samu
 ;------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ SetWorkingDir %A_ScriptDir%
 
 ;############################### Programm Info ###############################
 PrgName := "demo file renamer"
-PrgVersion := "1.05 (AHK)"
+PrgVersion := "1.07 (AHK)"
 
 ;############################### OS Detections ###############################
 If (A_PtrSize = 4)
@@ -31,6 +31,15 @@ else
 }
 
 ;############################### Functions ###############################
+HasVal(haystack, needle) {                                              ;HasVal function from https://autohotkey.com/boards/viewtopic.php?p=109617#p109617
+    for index, value in haystack
+        if (value = needle)
+            return index
+    if !(IsObject(haystack))
+        throw Exception("Bad haystack!", -1, haystack)
+    return 0
+}
+
 ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
 {
     Loop, Files, *.dem
@@ -55,7 +64,7 @@ ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
 
         If (InStr(mapstring_formated, "maps") and InStr(mapstring_formated, "bsp"))
         {
-            RegExMatch(mapstring_formated, "(?<=maps[\/\\]).+(?=\.bsp)", Mapname) ;regex lookahead and lookbehind
+            RegExMatch(mapstring_formated, "(?<=maps[\/\\]).+(?=\.bsp)", Mapname) ;RegEx lookahead and lookbehind
             Mapname := Format("{1:s}", Mapname)
             If (InStr(Mapname, "/") or InStr(Mapname, "\"))
             {
@@ -83,6 +92,80 @@ ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
     return [filelist, filelist_failed, counter_failed]
 }
 
+ParsingFullDemofiles(RenamingMaskNumber, counter_files_quotient)
+{
+    Loop, Files, *.dem
+    {
+        counter_prog := counter_files_quotient * A_Index
+        GuiControl,, ProgressBar, %counter_prog%
+        mapstring := ""
+        File := FileOpen(A_LoopFileName, "r")
+        mapstring_formated := [] ;init Array Object (same as var := Object())
+        while !File.AtEOF
+        {
+            demofile := File.ReadLine()
+            RegExMatch(demofile, "maps[\/\\].+\.bsp", mapstring)
+            If mapstring
+            {
+                mapstring_formated.insert(Format("{1:s}", mapstring))
+            }
+        }
+        File.Close()
+
+        Mapname := []
+        x := 0
+        while A_Index <= mapstring_formated.MaxIndex()
+        {
+            needle := ""
+            If (InStr(mapstring_formated[A_Index], "maps") and InStr(mapstring_formated[A_Index], "bsp"))
+            {
+                RegExMatch(mapstring_formated[A_Index], "(?<=maps[\/\\]).+(?=\.bsp)", needle) ;RegEx lookahead and lookbehind
+                needle := Format("{1:s}", needle)
+                If (InStr(needle, "/") or InStr(needle, "\"))
+                {
+                    needle := RegExReplace(needle, ".+[\/\\]", "")
+                }
+                arraypos := HasVal(Mapname, needle)
+                If !arraypos
+                {
+                    ; MsgBox % "Mapname: " . Mapname . " needle: " . needle . " arraypos: " . arraypos "`n if"
+                    Mapname.InsertAt(1,needle)
+                }
+            }
+        }
+
+        If Mapname.MaxIndex()
+        {
+            Mapnames_all := ""
+            while A_Index <= Mapname.MaxIndex()
+            {
+                If Mapnames_all
+                {
+                    Mapnames_all := Mapnames_all . "+"
+                }
+                Mapnames_all := Mapnames_all . Mapname[A_Index]
+            }
+            SplitPath, A_LoopFileName,,,, FileNameNoExt
+            If (RenamingMaskNumber = 3) or (RenamingMaskNumber = 4)
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM-dd
+            }
+            RenamingMask := []
+            RenamingMask[1] := filelist . A_LoopFileName . "`t" . FileNameNoExt . "_" . Mapnames_all . "." . A_LoopFileExt . "`n"
+            RenamingMask[2] := filelist . A_LoopFileName . "`t" . Mapnames_all . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
+            RenamingMask[3] := filelist . A_LoopFileName . "`t" . mod_date . "_" . Mapnames_all . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
+            RenamingMask[4] := filelist . A_LoopFileName . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapnames_all . "." . A_LoopFileExt . "`n"
+            filelist := RenamingMask[RenamingMaskNumber]
+        }
+        else
+        {
+            filelist_failed := filelist_failed . A_LoopFileName . "`n"
+            counter_failed += 1
+        }
+    }
+    return [filelist, filelist_failed, counter_failed]
+}
+
 ;############################### GUI ###############################
 Menu, helpmenu, Add, Help , MenuHelp
 Menu, helpmenu, Add
@@ -99,6 +182,7 @@ Gui, Add, Text, x12 y10 w290 h20 , Choose renaming mask
 Gui, Add, Text, x12 y70 w290 h40 vtext_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "samurai-vs-ninja_de_dust2.dem"
 
 Gui, Add, Progress, x12 y140 w290 h10 Backgroundsilver vProgressBar
+Gui, Add, Checkbox, x12 y157 w290 h20 vOption_1, Parsing full demofile (processing intese)
 ; Generated using SmartGUI Creator for SciTE
 Gui, Show, w323 h221, %PrgName%
 return
@@ -114,7 +198,7 @@ GoldSrc- and Source Engine demofiles and place it in the name of the demofile it
 
 Which kind of demofiles this tool can handle?
 Currently this tool support Counter-Strike 1.6, Counter-Strike Source,
-Counter-Strike Global Office and Team Fortress 2 demofiles.
+Counter-Strike Global Offensive and Team Fortress 2 demofiles.
 
 How to use?
 1. Select your renaming mask you want
@@ -123,9 +207,16 @@ How to use?
     are not included).
     In a protected folder (like "ProgramFiles") you have to start this program in admin mode!
 3. Press OK and wait until you will hopefully be happy :)
+
+Options Info:
+Parsing full demofile: This option is recommended for old demofiles (CS 1.6 etc.),
+because it was able to record into the same file when a mapchange occur. So the hole
+file have to be read to detect all played maps in one file. This was fixed in newer
+games (CS:GO etc.), so it isn't necessary there. Use this option if you are unsure.
 )
+
 Gui, Help:Add, Button, Default, OK
-Gui, Help:Show, w450 h240, Help
+Gui, Help:Show, w450 h320, Help
 return
 
 MenuLicense:
@@ -193,6 +284,14 @@ pressListBox:
     GuiControl,, text_example, Example: `n"samurai-vs-ninja.dem" will be renamed to "2007-05-03_samurai-vs-ninja_de_dust2.dem"
 return
 
+; pressOption_1:
+    ; Gui, Submit, NoHide
+    ; if (Option_1 = 1)
+    ; GuiControl,, text_example, %text_example% (Look into Help for additional informations)
+    ; else
+    ; GoTo pressListBox
+; return
+
 ButtonCancel:
 GuiClose:
 ExitApp
@@ -210,7 +309,9 @@ counter_successfully := ""
 logfile_counter := 1
 GuiControl, Disable, Start
 GuiControl, Disable, RenamingMaskNumber
+GuiControl, Disable, Option_1
 GuiControlGet, RenamingMaskNumber
+GuiControlGet, Option_1
 FileSelectFolder, folder_demofiles,, 0, Please select your folder where your demofiles are. `nAll files with the ending *.dem will be renamed.
 if ErrorLevel=0
 {
@@ -222,7 +323,14 @@ if ErrorLevel=0
     If counter_files
     {
         counter_files_quotient := 100 / counter_files
-        ParsingInfo := ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
+        If Option_1
+        {
+            ParsingInfo := ParsingFullDemofiles(RenamingMaskNumber, counter_files_quotient)
+        }
+        else
+        {
+            ParsingInfo := ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
+        }
         filelist := ParsingInfo[1]
         filelist_failed := ParsingInfo[2]
         counter_failed := ParsingInfo[3]
@@ -266,6 +374,7 @@ if ErrorLevel=0
         GuiControl,, ProgressBar, 0
         GuiControl,, text_prog, Extracting mapname
         GuiControl, Enable, RenamingMaskNumber
+        GuiControl, Enable, Option_1
         GuiControl, Enable, Cancel
         GuiControl, Enable, Start
         return
@@ -275,6 +384,7 @@ if ErrorLevel=0
         MsgBox % "No files found!"
         GuiControl,, ProgressBar, 0
         GuiControl, Enable, RenamingMaskNumber
+        GuiControl, Enable, Option_1
         GuiControl, Enable, Cancel
         GuiControl, Enable, Start
         return
@@ -284,6 +394,7 @@ else
 {
     GuiControl,, ProgressBar, 0
     GuiControl, Enable, RenamingMaskNumber
+    GuiControl, Enable, Option_1
     GuiControl, Enable, Start
     return
 }
