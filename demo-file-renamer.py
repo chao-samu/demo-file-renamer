@@ -1,142 +1,47 @@
 ﻿#! /usr/bin/python
 # -*- coding: UTF-8 -*-
 
-#  =================================================================================================
+#  ===================================================================================
 #  Python Version ......: 3.*
-#  Version .............: 1.10 (Python)
-#  Release Date ........: 2017-06-30
+#  Version .............: 1.07 (Python)
+#  Release Date ........: 2017-03-10
 #  GitHub ..............: https://github.com/chao-samu/demo-file-renamer
 #  Author ..............: chao-samu
-# --------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------
 #  Script Name..........: demo file renamer
 #  Description .........: Integrate mapname into demofile (*.dem).
 #                         Support: TF2, CS 1.6, CS:S and CS:GO
-#  License..............: MIT License 
-#                         (https://github.com/chao-samu/demo-file-renamer/blob/master/LICENSE)
-#  =================================================================================================
-
+#  License..............: MIT License (https://github.com/chao-samu/demo-file-renamer/blob/master/LICENSE)
+#  ===================================================================================
 
 import wx
-import datetime, glob, os, os.path, re, string, sys, textwrap, threading
+import datetime, glob, os, os.path, re, string, sys, textwrap
 
-
-# ADDITIONAL EVENTS FOR THREAD "DemoFileRenamer" ===================================================
-myEVT_GUIENABLE = wx.NewEventType()
-EVT_GUIENABLE = wx.PyEventBinder(myEVT_GUIENABLE, 1)
-class GUIEnableEvent(wx.PyCommandEvent):
-    """Event to signal that a count value is ready"""
-    def __init__(self, etype, eid):
-        """Creates the event object"""
-        wx.PyCommandEvent.__init__(self, etype, eid)
-
-myEVT_GUIDISABLE = wx.NewEventType()
-EVT_GUIDISABLE = wx.PyEventBinder(myEVT_GUIDISABLE, 1)
-class GUIDisableEvent(wx.PyCommandEvent):
-    """Event to signal that a count value is ready"""
-    def __init__(self, etype, eid):
-        """Creates the event object"""
-        wx.PyCommandEvent.__init__(self, etype, eid)
-
-myEVT_GAUGESETRANGE = wx.NewEventType()
-EVT_GAUGESETRANGE = wx.PyEventBinder(myEVT_GAUGESETRANGE, 1)
-class GaugeSetRangeEvent(wx.PyCommandEvent):
-    """Event to signal that a count value is ready"""
-    def __init__(self, etype, eid, demofileCount):
-        """Creates the event object"""
-        wx.PyCommandEvent.__init__(self, etype, eid)
-        self._demofileCount = demofileCount
-
-    def GetValue(self):
-        """Returns the value from the event.
-        @return: the value of this event
-
-        """
-        return self._demofileCount
-
-myEVT_GAUGEPROGRESS = wx.NewEventType()
-EVT_GAUGEPROGRESS = wx.PyEventBinder(myEVT_GAUGEPROGRESS, 1)
-class GaugeProgressEvent(wx.PyCommandEvent):
-    """Event to signal that a count value is ready"""
-    def __init__(self, etype, eid, x):
-        """Creates the event object"""
-        wx.PyCommandEvent.__init__(self, etype, eid)
-        self._gaugeProgress = x
-
-    def GetValue(self):
-        """Returns the value from the event.
-        @return: the value of this event
-
-        """
-        return self._gaugeProgress
-
-myEVT_FINISH = wx.NewEventType()
-EVT_FINISH = wx.PyEventBinder(myEVT_FINISH, 1)
-class FinishEvent(wx.PyCommandEvent):
-    """Event to signal that a count value is ready"""
-    def __init__(self, etype, eid):
-        """Creates the event object"""
-        wx.PyCommandEvent.__init__(self, etype, eid)
-
-myEVT_FINISHFAILED = wx.NewEventType()
-EVT_FINISHFAILED = wx.PyEventBinder(myEVT_FINISHFAILED, 1)
-class FinishFailedEvent(wx.PyCommandEvent):
-    """Event to signal that a count value is ready"""
-    def __init__(self, etype, eid, logfile_name, logfile_ext, file_failed_counter):
-        """Creates the event object"""
-        wx.PyCommandEvent.__init__(self, etype, eid)
-        self._logfile_name = logfile_name
-        self._logfile_ext = logfile_ext
-        self._file_failed_counter = file_failed_counter
-
-    def GetValues(self):
-        """Returns the value from the event.
-        @return: the value of this event
-
-        """
-        return (self._logfile_name, self._logfile_ext, self._file_failed_counter)
-
-myEVT_ONERROR = wx.NewEventType()
-EVT_ONERROR = wx.PyEventBinder(myEVT_ONERROR, 1)
-class OnErrorEvent(wx.PyCommandEvent):
-    """Event to signal that a count value is ready"""
-    def __init__(self, etype, eid, errorMessage):
-        """Creates the event object"""
-        wx.PyCommandEvent.__init__(self, etype, eid)
-        self._errorMessage = errorMessage
-
-    def GetValue(self):
-        """Returns the value from the event.
-        @return: the value of this event
-
-        """
-        return self._errorMessage
-
-# GUI ==============================================================================================
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(345,320), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
-
+        
         # programm variables
         self.PrgName = title
         self.PrgVersion = "v1.05"
         self.PytonVersion = sys.version
         self.WxVersion = wx.__version__
         IconPath = "_ico" + os.sep + "Demofile Renamer.ico"
-
+        
         # init variables
         self.ListSelection = 0
         textExample = 'Example:\n "samurai-vs-ninja.dem" will be renamed to\n "samurai-vs-ninja_de_dust2.dem"'
-
+        
         # Center frame
         self.Center()
-
+        
         # Icon set
         # ico = wx.Icon(IconPath, wx.BITMAP_TYPE_ICO)
         # self.SetIcon(ico)
-
+        
         # StatusBar creation in the bottom of the window
-        self.CreateStatusBar()
-
+        self.CreateStatusBar() 
+        
         # MenuBar in the top of the window
         helpmenu = wx.Menu()
 
@@ -153,43 +58,31 @@ class MainWindow(wx.Frame):
         menuBar.Append(helpmenu,"&Help") # Adding the "helpmenu" to the MenuBar
         self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
 
-        # FramePanel creation
+        # FramePanel creation        
         panel = wx.Panel(self, -1)
         wx.StaticText(panel, -1, "Choose renaming mask:",(30,15))
-        
-        self.ListBoxSelect = wx.ListBox(panel, -1, choices=["OLDNAME_MAPNAME", "MAPNAME_OLDNAME", \
-        "YYYY-MM-DD_MAPNAME_OLDNAME", "YYYY-MM-DD_OLDNAME_MAPNAME"],size=(270,35),pos=(30,40))
-        
+        self.ListBoxSelect = wx.ListBox(panel, -1, choices=["OLDNAME_MAPNAME", "MAPNAME_OLDNAME", "YYYY-MM-DD_MAPNAME_OLDNAME", "YYYY-MM-DD_OLDNAME_MAPNAME"],size=(270,35),pos=(30,40))
         self.StaticTextExample = wx.StaticText(panel, -1, textExample,(30,80))
         wx.StaticText(panel, -1, "Extracting mapname",(30,150))
         self.GaugeProgress = wx.Gauge(panel, -1, range=100, pos=(30,170),size=(270,10))
         self.buttonCancel = wx.Button(panel, -1, "Cancel", (30,200),(90,20))
         self.buttonStart = wx.Button(panel, -1, "Start", (210,200),(90,20))
-
+        
         # Preselect default settings
         self.ListBoxSelect.SetSelection(0)
-
+        
         # Set events.
         self.Bind(wx.EVT_MENU, self.OnHelp, menuHelp)
         self.Bind(wx.EVT_MENU, self.OnLicense, menuLicense)
-        self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
+        self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)     
         self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
         self.Bind(wx.EVT_LISTBOX, self.OnListSelect, self.ListBoxSelect)
         self.Bind(wx.EVT_BUTTON, self.OnStart, self.buttonStart)
         self.Bind(wx.EVT_BUTTON, self.OnCancel, self.buttonCancel)
-
-        # Set events (DemoFileRenamer thread handling only)
-        self.Bind(EVT_GUIENABLE, self.OnGuiEnable)
-        self.Bind(EVT_GUIDISABLE, self.OnGuiDisable)
-        self.Bind(EVT_GAUGESETRANGE, self.OnGaugeSetRange)
-        self.Bind(EVT_GAUGEPROGRESS, self.OnGaugeProgress)
-        self.Bind(EVT_FINISH, self.OnFinish)
-        self.Bind(EVT_FINISHFAILED, self.OnFinishFailed)
-        self.Bind(EVT_ONERROR, self.OnError)
-
+        
         # Create/Show MainWindow
         self.Show(True)
-
+        
     def OnHelp(self, event):
         # MessageDialog creation
         MessageDlgText = """\
@@ -210,11 +103,11 @@ class MainWindow(wx.Frame):
         3. Press OK and wait until you will hopefully be happy :)
         """
         MessageDlgText = textwrap.dedent(MessageDlgText)
-
+        
         dlg = wx.MessageDialog( self, MessageDlgText, "Help", wx.OK)
         dlg.ShowModal() # Show it
         dlg.Destroy() # finally destroy it when finished.
-
+        
     def OnLicense(self, event):
         # MessageDialog creation
         MessageDlgText = """\
@@ -243,26 +136,24 @@ class MainWindow(wx.Frame):
         SOFTWARE.
         """
         MessageDlgText = textwrap.dedent(MessageDlgText)
-
+        
         dlg = wx.MessageDialog( self, MessageDlgText, "About", wx.OK)
         dlg.ShowModal() # Show it
         dlg.Destroy() # finally destroy it when finished.
 
     def OnAbout(self, event):
-        # MessageDialog creation      
-        MessageDlgText = self.PrgName + ":\n" + self.PrgVersion + "\n\nBased on Python version:\n" + \
-        self.PytonVersion + "\n\nGUI made with wxPython version:\n" + self.WxVersion + "\n\nMade by chao-samu" + \
-        "\nLook for updates: https://github.com/chao-samu"
-
+        # MessageDialog creation
+        MessageDlgText = self.PrgName + ":\n" + self.PrgVersion + "\n\nBased on Python version:\n" + self.PytonVersion + "\n\nGUI made with wxPython version:\n" + self.WxVersion + "\n\nMade by chao-samu" + "\nLook for updates: https://github.com/chao-samu"
+        
         dlg = wx.MessageDialog( self, MessageDlgText, "License", wx.OK)
         dlg.ShowModal() # Show it
         dlg.Destroy() # finally destroy it when finished.
-
+        
     def OnExit(self, event):
         self.Close(True)  # Close the frame.
-
+        
     def OnListSelect(self, event):
-        self.ListSelection = event.GetSelection()
+        self.ListSelection = event.GetSelection()      
         if self.ListSelection == 0:
             textExample = 'Example:\n "samurai-vs-ninja.dem" will be renamed to\n "samurai-vs-ninja_de_dust2.dem"'
             self.StaticTextExample.SetLabel(textExample)
@@ -275,110 +166,80 @@ class MainWindow(wx.Frame):
         else:
             textExample = 'Example:\n "samurai-vs-ninja.dem" will be renamed to\n "2007-05-03_samurai-vs-ninja_de_dust2.dem"'
             self.StaticTextExample.SetLabel(textExample)
-
+            
     def OnStart(self, event):
-        saveDirDialog = wx.DirDialog(self, "Please select your folder where your demofiles are.\n" \
-        "All files with the ending *.dem will be renamed.", "", wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
+        saveDirDialog = wx.DirDialog(self, "Please select your folder where your demofiles are.\n All files with the ending *.dem will be renamed.", "", wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)       
 
         if saveDirDialog.ShowModal() == wx.ID_OK:
             os.chdir(saveDirDialog.GetPath())
-
-            StartSelect = self.StartRenaming()
-            if StartSelect is True:
-                # start thread
-                worker = DemoFileRenamer(self, self.ListSelection)
-                worker.start()
+            # MTT = futures.ThreadPoolExecutor(max_workers=1) # wrong implemented, needs a better solution
+            # MTT.submit(RenamingDemoFiles, self.ListSelection) # wrong implemented, needs a better solution
+            # MTT.shutdown(False) # wrong implemented, needs a better solution
+            DemoFileRenamer(self.ListSelection).start()
+            return
         else:
             return     # the user changed idea...
-
-    def StartRenaming(self):
+            
+    def OnCancel(self, event):
+        self.Close()
+        
+    def OnFinish(self):
         # MessageDialog creation
-        MessageDlgText = "Files found: " + str(len(glob.glob('*.dem'))) + "\nDo you like to start renaming?"
+        MessageDlgText = "All files successfully renamed!"
+        
+        dlg = wx.MessageDialog( self, MessageDlgText, "Success", wx.OK)
+        dlg.ShowModal() # Show it
+        dlg.Destroy() # finally destroy it when finished.
+        
+    def OnFinishFailed(self, logfile_name, logfile_ext, file_failed_counter):
+        # MessageDialog creation
+        MessageDlgText = "Files failed to rename: " + str(file_failed_counter) + " of " + str(len(glob.glob('*.dem'))) + "\nLogfile is generated, please look for further information in logfile: \"" + os.getcwd() +  os.sep + logfile_name + logfile_ext + "\""
+        
+        dlg = wx.MessageDialog( self, MessageDlgText, "Partitial success", wx.OK)
+        dlg.ShowModal() # Show it
+        dlg.Destroy() # finally destroy it when finished.
+        
+    def OnStartRenaming(self, demofileCount):
+        # MessageDialog creation
+        MessageDlgText = "Files found: " + str(demofileCount) + "\nDo you like to start renaming?"
+        
         dlg = wx.MessageDialog( self, MessageDlgText, "Really start", wx.CANCEL | wx.OK)
-
+        
         if dlg.ShowModal() == wx.ID_OK:
             return True
         else:
             return  # the user changed idea...
-
+        
         dlg.ShowModal() # Show it
         dlg.Destroy() # finally destroy it when finished.
-
-    def OnCancel(self, event):
-        self.Close()
-
-    # THREAD EVENTS FOR "DemoFileRenamer" ---------------------------------------------------------
-    def OnGuiEnable(self, evt):
-        self.buttonStart.Enable()
-        self.buttonCancel.Enable()
-        self.ListBoxSelect.Enable()
-        self.GaugeProgress.SetValue(0)
-
-    def OnGuiDisable(self, evt):
-        self.buttonStart.Disable()
-        self.buttonCancel.Disable()
-        self.ListBoxSelect.Disable()
-
-    def OnGaugeSetRange(self, evt):
-        self.GaugeProgress.SetRange(evt.GetValue())
-
-    def OnGaugeProgress(self, evt):
-        self.GaugeProgress.SetValue(evt.GetValue())
-
-    def OnFinish(self, evt):
+        
+    def OnError(self, e):
         # MessageDialog creation
-        MessageDlgText = "All files successfully renamed!"
-
-        dlg = wx.MessageDialog( self, MessageDlgText, "Success", wx.OK)
+        #MessageDlgText = "Error\n\n " + str(sys.exc_info()[0])
+        MessageDlgText = ("OSError: {0}".format(e))
+        dlg = wx.MessageDialog( self, MessageDlgText, "Error", wx.OK)       
         dlg.ShowModal() # Show it
         dlg.Destroy() # finally destroy it when finished.
-
-    def OnFinishFailed(self, evt):
-        logfile_name, logfile_ext, file_failed_counter = evt.GetValues()
-        # MessageDialog creation
-        MessageDlgText = "Files failed to rename: " + str(file_failed_counter) + " of " + \
-        str(len(glob.glob('*.dem'))) + "\nLogfile is generated, please look for further information in logfile: \"" + \
-        os.getcwd() +  os.sep + logfile_name + logfile_ext + "\""
-
-        dlg = wx.MessageDialog( self, MessageDlgText, "Partitial success", wx.OK)
-        dlg.ShowModal() # Show it
-        dlg.Destroy() # finally destroy it when finished.
-
-    def OnError(self, evt):
-        # MessageDialog creation
-        # MessageDlgText = "Error\n\n " + str(sys.exc_info()[0])
-        MessageDlgText = ("OSError: {0}".format(evt.GetValue()))
-        dlg = wx.MessageDialog( self, MessageDlgText, "Error", wx.OK)
-        dlg.ShowModal() # Show it
-        dlg.Destroy() # finally destroy it when finished.
-
-# MAIN FUNCTION THREADED ===========================================================================
-class DemoFileRenamer(threading.Thread):
-    def __init__(self, parent, ListSelection):
-        """
-        @param parent: The gui object that should recieve the value
-        @param value: value to 'calculate' to
-        """
-        threading.Thread.__init__(self)
-        self._parent = parent
+  
+class DemoFileRenamer():
+    def __init__(self, ListSelection):   
+    
+        #variables
         self.ListSelection = ListSelection
-
-    def run(self):
-        """Overrides Thread.run. Don't call this directly its called internally
-        when you call Thread.start().
-        """
+      
+    def start(self):
         file_failed = ""
         x = 0
         file_failed_counter = 0
         demofiles = glob.glob('*' + os.extsep + 'dem')
         demofileCount = len(demofiles)
-
-        evt = GaugeSetRangeEvent(myEVT_GAUGESETRANGE, -1, demofileCount)
-        wx.PostEvent(self._parent, evt)
-
-        evt = GUIDisableEvent(myEVT_GUIDISABLE, -1)
-        wx.PostEvent(self._parent, evt)
-
+        frame.GaugeProgress.SetRange(demofileCount)
+        StartSelect = frame.OnStartRenaming(demofileCount)
+        if StartSelect is not True:
+            return
+        frame.buttonStart.Disable()
+        frame.buttonCancel.Disable()
+        frame.ListBoxSelect.Disable()
         print ("Files found: " + str(demofileCount) + "\nStarting renaming..." + "\nIn progress please wait...")
         for file_source in demofiles:
             with open(file_source, 'r', errors='ignore') as fobj:
@@ -407,28 +268,23 @@ class DemoFileRenamer(threading.Thread):
                 try:
                     os.rename(file_source, file_destination)
                 except OSError as e:
-
-                    evt = OnErrorEvent(myEVT_ONERROR, -1, e)
-                    wx.PostEvent(self._parent, evt)
-
+                    frame.OnError(e)               
                     print("OSError: {0}".format(e))
-
-                    evt = GUIEnableEvent(myEVT_GUIENABLE, -1)
-                    wx.PostEvent(self._parent, evt)
+                    frame.buttonStart.Enable()
+                    frame.buttonCancel.Enable()
+                    frame.ListBoxSelect.Enable()
+                    frame.GaugeProgress.SetValue(0)
                     return
-            else:
+            else:           
                 file_failed = file_failed + file_source + '\n'
                 file_failed_counter += 1
             x += 1
-
-            evt = GaugeProgressEvent(myEVT_GAUGEPROGRESS, -1, x)
-            wx.PostEvent(self._parent, evt)
+            frame.GaugeProgress.SetValue(x)
 
         if file_failed:
             logfile_name = 'logfile_demo-file-renamer'
             logfile_ext = os.extsep + 'txt'
-            logfile_text = """The following files aren't renamed because the map wasn't found in the demofile: \n\n""" + file_failed + \
-            """\nWhat you can do: \n- Execute the demofile in your game or \n- Open the file in an editor and search for the word "maps" \n\nBe sure the demofile is a CS 1.6, CS:S, CS:GO or TF2 demofile."""
+            logfile_text = """The following files aren't renamed because the map wasn't found in the demofile: \n\n""" + file_failed +  """\nWhat you can do: \n- Execute the demofile in your game or \n- Open the file in an editor and search for the word "maps" \n\nBe sure the demofile is a CS 1.6, CS:S, CS:GO or TF2 demofile."""
             if os.path.isfile(logfile_name + logfile_ext):
                 logfile_counter = 2
                 logfile_name_check =  logfile_name + "(" + str(logfile_counter) + ")" + logfile_ext
@@ -438,21 +294,15 @@ class DemoFileRenamer(threading.Thread):
                 logfile = open(logfile_name_check, 'x').write(logfile_text)
             else:
                 logfile = open(logfile_name + logfile_ext, 'x').write(logfile_text)
-
-            evt = FinishFailedEvent(myEVT_FINISHFAILED, -1, logfile_name, logfile_ext, file_failed_counter)
-            wx.PostEvent(self._parent, evt)
-
-            print("Files failed to rename: " + str(file_failed_counter) + " of " + str(demofileCount) + \
-            "\nLogfile is generated, please look for further information in logfile: \"" + os.getcwd() + \
-            os.sep + logfile_name + logfile_ext + "\"")
-            
+            frame.OnFinishFailed(logfile_name, logfile_ext, file_failed_counter)
+            print("Files failed to rename: " + str(file_failed_counter) + " of " + str(demofileCount) + "\nLogfile is generated, please look for further information in logfile: \"" + os.getcwd() +  os.sep + logfile_name + logfile_ext + "\"")
         else:
-            evt = FinishEvent(myEVT_FINISH, -1)
-            wx.PostEvent(self._parent, evt)
-            print("All files successfully renamed!")
-
-        evt = GUIEnableEvent(myEVT_GUIENABLE, -1)
-        wx.PostEvent(self._parent, evt)
+            frame.OnFinish()
+            print("All files successfully renamed!")    
+        frame.buttonStart.Enable()
+        frame.buttonCancel.Enable()
+        frame.ListBoxSelect.Enable()
+        frame.GaugeProgress.SetValue(0)
 
 # wxPython window loop
 app = wx.App(False)
