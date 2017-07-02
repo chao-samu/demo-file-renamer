@@ -1,7 +1,7 @@
 ﻿; ==================================================================================================
 ; AutoHotkey Version ..: 1.1.*
-; Version .............: 1.10-beta (AHK)
-; Release Date ........: 2017-05-02
+; Version .............: 1.09 (AHK)
+; Release Date ........: 2017-04-08
 ; GitHub ..............: https://github.com/chao-samu/demo-file-renamer
 ; Author ..............: chao-samu
 ;------------------------------------------------------------------------------------
@@ -19,7 +19,7 @@ SetWorkingDir %A_ScriptDir%
 
 ; Programm Info ####################################################################################
 PrgName := "demo file renamer"
-PrgVersion := "1.10 (AHK)"
+PrgVersion := "1.09 (AHK)"
 
 ; OS Detections ####################################################################################
 If A_PtrSize = 4
@@ -38,81 +38,6 @@ HasVal(haystack, needle) {
     return 0
 }
 
-RenamingOption(RenamingMaskNumber, Mapname, FileNameNoExt)
-{
-    If RenamingMaskNumber = 1
-    {
-        new_file_name :=
-        (Join
-        A_LoopFileName
-        . "`t" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
-        )
-    }
-    else if RenamingMaskNumber = 2
-    {
-        new_file_name :=
-        (Join
-        A_LoopFileName
-        . "`t" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
-        )
-    }
-    else if RenamingMaskNumber = 3
-    {
-        FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy
-        new_file_name :=
-        (Join
-        A_LoopFileName
-        . "`t" . mod_date . "_" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
-        )
-    }
-    else if RenamingMaskNumber = 4
-    {
-        FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy
-        new_file_name :=
-        (Join
-        A_LoopFileName
-        . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
-        )
-    }
-    else if RenamingMaskNumber = 5
-    {
-        FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM
-        new_file_name :=
-        (Join
-        A_LoopFileName
-        . "`t" . mod_date . "_" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
-        )
-    }
-    else if RenamingMaskNumber = 6
-    {
-        FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM
-        new_file_name :=
-        (Join
-        A_LoopFileName
-        . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
-        )
-    }
-    else if RenamingMaskNumber = 7
-    {
-        FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM-dd
-        new_file_name :=
-        (Join
-        A_LoopFileName
-        . "`t" . mod_date . "_" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
-        )
-    }
-    else
-    {
-        FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM-dd
-        new_file_name :=
-        (Join
-        A_LoopFileName
-        . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
-        )
-    }
-    return new_file_name
-}
-
 ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
 {
     Loop, Files, *.dem
@@ -128,12 +53,12 @@ ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
             demofile := File.ReadLine()
             RegExMatch(demofile, "maps[\/\\].+\.bsp", mapstring)
             If mapstring
-            {               
+            {
+                File.Close()
                 mapstring_formated := Format("{1:s}", mapstring)
                 continue
             }
         }
-        File.Close()
 
         If (InStr(mapstring_formated, "maps") and InStr(mapstring_formated, "bsp"))
         {
@@ -145,8 +70,76 @@ ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
                 Mapname := RegExReplace(Mapname, ".+[\/\\]", "")
             }
             SplitPath, A_LoopFileName,,,, FileNameNoExt
-            new_file_name := RenamingOption(RenamingMaskNumber, Mapname, FileNameNoExt)
-            filelist := filelist . new_file_name
+            If RenamingMaskNumber = 1
+            {
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else if RenamingMaskNumber = 2
+            {
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else if RenamingMaskNumber = 3
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . mod_date . "_" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else if RenamingMaskNumber = 4
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else if RenamingMaskNumber = 5
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . mod_date . "_" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else if RenamingMaskNumber = 6
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else if RenamingMaskNumber = 7
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM-dd
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . mod_date . "_" . Mapname . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM-dd
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapname . "." . A_LoopFileExt . "`n"
+                )
+            }
         }
         else
         {
@@ -178,7 +171,7 @@ ParsingFullDemofiles(RenamingMaskNumber, counter_files_quotient)
         }
         File.Close()
 
-        Mapnames := []
+        Mapname := []
         x := 0
         while A_Index <= mapstring_formated.MaxIndex()
         {
@@ -192,29 +185,97 @@ ParsingFullDemofiles(RenamingMaskNumber, counter_files_quotient)
                 {
                     needle := RegExReplace(needle, ".+[\/\\]", "")
                 }
-                arraypos := HasVal(Mapnames, needle)
+                arraypos := HasVal(Mapname, needle)
                 If !arraypos
                 {
 
-                    Mapnames.Push(needle)
+                    Mapname.Push(needle)
                 }
             }
         }
 
-        If Mapnames.MaxIndex()
+        If Mapname.MaxIndex()
         {
-            Mapname := ""
-            while A_Index <= Mapnames.MaxIndex()
+            Mapnames_all := ""
+            while A_Index <= Mapname.MaxIndex()
             {
-                If Mapname
+                If Mapnames_all
                 {
-                    Mapname := Mapname . "+"
+                    Mapnames_all := Mapnames_all . "+"
                 }
-                Mapname := Mapname . Mapnames[A_Index]
+                Mapnames_all := Mapnames_all . Mapname[A_Index]
             }
             SplitPath, A_LoopFileName,,,, FileNameNoExt
-            new_file_name := RenamingOption(RenamingMaskNumber, Mapname, FileNameNoExt)
-            filelist := filelist . new_file_name
+            If RenamingMaskNumber = 1
+            {
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . FileNameNoExt . "_" . Mapnames_all . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else if RenamingMaskNumber = 2
+            {
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . Mapnames_all . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else if RenamingMaskNumber = 3
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . mod_date . "_" . Mapnames_all . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else if RenamingMaskNumber = 4
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapnames_all . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else if RenamingMaskNumber = 5
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . mod_date . "_" . Mapnames_all . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else if RenamingMaskNumber = 6
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapnames_all . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else if RenamingMaskNumber = 7
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM-dd
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . mod_date . "_" . Mapnames_all . "_" . FileNameNoExt . "." . A_LoopFileExt . "`n"
+                )
+            }
+            else
+            {
+                FormatTime, mod_date, %A_LoopFileTimeModified%, yyyy-MM-dd
+                filelist :=
+                (Join
+                filelist . A_LoopFileName
+                . "`t" . mod_date . "_" . FileNameNoExt . "_" . Mapnames_all . "." . A_LoopFileExt . "`n"
+                )
+            }
         }
         else
         {
@@ -233,8 +294,8 @@ Menu, helpmenu, Add, About, MenuAbout
 Menu, topmenu, Add, &Help, :helpmenu
 Gui, Menu, topmenu
 
-Gui, Add, Button, x12 y187 w90 h20 , Cancel
-Gui, Add, Button, x212 y187 w90 h20 , Start
+Gui, Add, Button, x12 y180 w90 h20 , Cancel
+Gui, Add, Button, x212 y180 w90 h20 , Start
 Gui, Add, Text, x12 y120 w290 h20 vtext_prog, Extracting mapname
 Gui, Add, ListBox, x12 y30 w290 h30 vRenamingMaskNumber AltSubmit gpressListBox,
 (Join
@@ -252,7 +313,7 @@ Gui, Add, Text, x12 y70 w290 h40 vtext_example
 , Example: `n"samurai-vs-ninja.dem" will be renamed to "samurai-vs-ninja_de_dust2.dem"
 
 Gui, Add, Progress, x12 y140 w290 h10 Backgroundsilver vProgressBar
-Gui, Add, Checkbox, x12 y157 w290 h20 vOption_1, Parsing full demofile (processing intense)
+Gui, Add, Checkbox, x12 y157 w290 h20 vOption_1, Parsing full demofile (processing intese)
 ; Generated using SmartGUI Creator for SciTE
 Gui, Show, w323 h221, %PrgName%
 return
@@ -410,6 +471,7 @@ ExitApp
 
 ; MAIN ####################################################################################
 ButtonStart:
+FormatTime, current_time
 ParsingDemofiles.Delete(1, 3)
 folder_demofiles := ""
 filelist := ""
@@ -458,7 +520,6 @@ if ErrorLevel=0
         If filelist_failed
         {
             logfile_name := "demo-file-renamer_logfile.txt"
-            FormatTime, current_time
             logfile :=
             (LTrim
             PrgName . " v" . PrgVersion "
