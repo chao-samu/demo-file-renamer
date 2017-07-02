@@ -533,7 +533,7 @@ class DemoFileRenamer(threading.Thread):
 
         evt = GUIEnableEvent(myEVT_GUIENABLE, -1)
         wx.PostEvent(self._parent, evt)
-        # START: FINISH (RESULT MESSAGES, LOG, GUI-UNLOCK) -----------------------------------------
+        # END: FINISH (RESULT MESSAGES, LOG, GUI-UNLOCK) -----------------------------------------
 
 # wxPython window loop
 app = wx.App(False)
