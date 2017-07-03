@@ -22,4 +22,5 @@ because it was able to record into the same file when a mapchange occur. So the 
 file have to be read to detect all played maps in one file. This was fixed in newer
 games (CS:GO etc.), so it isn't necessary there. Use this option if you are unsure.
 
+# Screenshots
 ![Alt text](_screenshots/AHK_demo-file-renamer_example.png)
