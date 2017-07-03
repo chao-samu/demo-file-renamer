@@ -13,7 +13,7 @@ GoldSrc- and Source Engine demofiles and place it in the name of the demofile it
 Currently this tool support Counter-Strike 1.6, Counter-Strike Source,
 Counter-Strike Global Offensive and Team Fortress 2 demofiles.
 
-**How to use?** <br />
+**How to use?**
 1. Select your renaming mask you want
 2. Press start and select in the following window your folder with the supported demofiles
     (please note, all demofiles with the ending "dem" in this folder will be renamed, subfolder
