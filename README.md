@@ -3,17 +3,20 @@ This tool was manly made to extract out the mapname of GoldSrc- and Source Engin
 
 ![Alt text](_screenshots/AHK_demo-file-renamer_example.png)
 
-# additional information
+# FAQ
 
 What can do this Tool?
+
 This tool was manly made to extract out the mapname of
 GoldSrc- and Source Engine demofiles and place it in the name of the demofile itself.
 
 Which kind of demofiles this tool can handle?
+
 Currently this tool support Counter-Strike 1.6, Counter-Strike Source,
 Counter-Strike Global Offensive and Team Fortress 2 demofiles.
 
 How to use?
+
 1. Select your renaming mask you want
 2. Press start and select in the following window your folder with the supported demofiles
     (please note, all demofiles with the ending "dem" in this folder will be renamed, subfolder
@@ -22,6 +25,7 @@ How to use?
 3. Press OK and wait until you will hopefully be happy :)
 
 Options Info:
+
 Parsing full demofile: This option is recommended for old demofiles (CS 1.6 etc.),
 because it was able to record into the same file when a mapchange occur. So the hole
 file have to be read to detect all played maps in one file. This was fixed in newer
