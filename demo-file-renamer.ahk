@@ -1,7 +1,7 @@
 ﻿; ==================================================================================================
 ; AutoHotkey Version ..: 1.1.*
-; Version .............: 1.10 (AHK)
-; Release Date ........: 2017-07-03
+; Version .............: 1.10-beta (AHK)
+; Release Date ........: 2017-05-02
 ; GitHub ..............: https://github.com/chao-samu/demo-file-renamer
 ; Author ..............: chao-samu
 ;------------------------------------------------------------------------------------
@@ -128,9 +128,9 @@ ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
             demofile := File.ReadLine()
             RegExMatch(demofile, "maps[\/\\].+\.bsp", mapstring)
             If mapstring
-            {
+            {               
                 mapstring_formated := Format("{1:s}", mapstring)
-                break
+                continue
             }
         }
         File.Close()
@@ -434,107 +434,99 @@ if ErrorLevel=0
     }
     If counter_files
     {
-        MsgBox, 1, Really start, Files found: %counter_files%`nDo you like to start renaming?
-        IfMsgBox, Cancel
+        counter_files_quotient := 100 / counter_files
+        If Option_1
         {
-            GuiControl, Enable, RenamingMaskNumber
-            GuiControl, Enable, Option_1
-            GuiControl, Enable, Start
-            return
+            ParsingInfo := ParsingFullDemofiles(RenamingMaskNumber, counter_files_quotient)
         }
         else
         {
-            counter_files_quotient := 100 / counter_files
-            If Option_1
-            {
-                ParsingInfo := ParsingFullDemofiles(RenamingMaskNumber, counter_files_quotient)
-            }
-            else
-            {
-                ParsingInfo := ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
-            }
-            filelist := ParsingInfo[1]
-            filelist_failed := ParsingInfo[2]
-            counter_failed := ParsingInfo[3]
-            GuiControl, Disable, Cancel
-            GuiControl,, text_prog, Renaming Files
-            Loop, Parse, filelist, `n
-            {
-                 filelist_array := StrSplit(A_LoopField, A_Tab)
-                 Source := filelist_array[1]
-                 Destination := filelist_array[2]
-                 FileMove, %Source%, %Destination%
-            }
-            If filelist_failed
-            {
-                logfile_name := "demo-file-renamer_logfile.txt"
-                FormatTime, current_time
-                logfile :=
-                (LTrim
-                PrgName . " v" . PrgVersion "
-                Renaming from " . current_time . " in " . A_WorkingDir . "
-
-                The following files aren't renamed because the map wasn't found in the demofile:
-
-                " . filelist_failed . "
-
-                What you can do:
-                - Execute the demofile in your game or
-                - Open the file in an editor and search for the word ""maps""
-                  Be sure the demofile is a CS 1.6, CS:S, CS:GO or TF2 demofile."
-                )
-                IfExist, %A_ScriptDir%\%logfile_name%
-                {
-                    filetrue := "A"
-                    while filetrue
-                    {
-                        logfile_counter +=1
-                        logfile_name := "demo-file-renamer_logfile(" . logfile_counter . ").txt"
-                        filetrue := FileExist(A_ScriptDir . "\" . logfile_name)
-                    }
-                    FileAppend, %logfile%, %A_ScriptDir%\%logfile_name%
-                }
-                else
-                {
-                    FileAppend, %logfile%, %A_ScriptDir%\%logfile_name%
-                }
-
-                counter_successfully := counter_files - counter_failed
-                logfile_path := A_ScriptDir . "\" . logfile_name
-                textmessage :=
-                (LTrim
-                counter_successfully . " out of " . counter_files . " files were successfully renamed.
-                There are " . counter_failed . " that aren't renamed.
-
-                Logfile is generated, please look for further information in logfile:
-                " logfile_path
-                )
-                MsgBox % textmessage
-            }
-            else
-            {
-                MsgBox, 0, , All demofiles successfully renamed!
-            }
-            GuiControl,, ProgressBar, 0
-            GuiControl,, text_prog, Extracting mapname
-            GuiControl, Enable, RenamingMaskNumber
-            GuiControl, Enable, Option_1
-            GuiControl, Enable, Cancel
-            GuiControl, Enable, Start
-            return
+            ParsingInfo := ParsingDemofiles(RenamingMaskNumber, counter_files_quotient)
         }
+        filelist := ParsingInfo[1]
+        filelist_failed := ParsingInfo[2]
+        counter_failed := ParsingInfo[3]
+        GuiControl, Disable, Cancel
+        GuiControl,, text_prog, Renaming Files
+        Loop, Parse, filelist, `n
+        {
+             filelist_array := StrSplit(A_LoopField, A_Tab)
+             Source := filelist_array[1]
+             Destination := filelist_array[2]
+             FileMove, %Source%, %Destination%
+        }
+        If filelist_failed
+        {
+            logfile_name := "demo-file-renamer_logfile.txt"
+            FormatTime, current_time
+            logfile :=
+            (LTrim
+            PrgName . " v" . PrgVersion "
+            Renaming from " . current_time . " in " . A_WorkingDir . "
+
+            The following files aren't renamed because the map wasn't found in the demofile:
+
+            " . filelist_failed . "
+
+            What you can do:
+            - Execute the demofile in your game or
+            - Open the file in an editor and search for the word ""maps""
+              Be sure the demofile is a CS 1.6, CS:S, CS:GO or TF2 demofile."
+            )
+            IfExist, %A_ScriptDir%\%logfile_name%
+            {
+                filetrue := "A"
+                while filetrue
+                {
+                    logfile_counter +=1
+                    logfile_name := "demo-file-renamer_logfile(" . logfile_counter . ").txt"
+                    filetrue := FileExist(A_ScriptDir . "\" . logfile_name)
+                }
+                FileAppend, %logfile%, %A_ScriptDir%\%logfile_name%
+            }
+            else
+            {
+                FileAppend, %logfile%, %A_ScriptDir%\%logfile_name%
+            }
+
+            counter_successfully := counter_files - counter_failed
+            logfile_path := A_ScriptDir . "\" . logfile_name
+            textmessage :=
+            (LTrim
+            counter_successfully . " out of " . counter_files . " files were successfully renamed.
+            There are " . counter_failed . " that aren't renamed.
+
+            Logfile is generated, please look for further information in logfile:
+            " logfile_path
+            )
+            MsgBox % textmessage
+        }
+        else
+        {
+            MsgBox, 0, , All demofiles successfully renamed!
+        }
+        GuiControl,, ProgressBar, 0
+        GuiControl,, text_prog, Extracting mapname
+        GuiControl, Enable, RenamingMaskNumber
+        GuiControl, Enable, Option_1
+        GuiControl, Enable, Cancel
+        GuiControl, Enable, Start
+        return
     }
     else
     {
         MsgBox % "No files found!"
+        GuiControl,, ProgressBar, 0
         GuiControl, Enable, RenamingMaskNumber
         GuiControl, Enable, Option_1
+        GuiControl, Enable, Cancel
         GuiControl, Enable, Start
         return
     }
 }
 else
 {
+    GuiControl,, ProgressBar, 0
     GuiControl, Enable, RenamingMaskNumber
     GuiControl, Enable, Option_1
     GuiControl, Enable, Start
