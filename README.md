@@ -1,11 +1,11 @@
-# demo-file-renamer
+# demo file renamer
 This tool was manly made to extract out the mapname of GoldSrc- and Source Engine demofiles and place it in the name of the demofile itself.
 
 ![Alt text](_screenshots/AHK_demo-file-renamer_example.png)
 
 # FAQ
 
-What can do this Tool? <br />
+What can this Tool do? <br />
 This tool was manly made to extract out the mapname of
 GoldSrc- and Source Engine demofiles and place it in the name of the demofile itself.
 
@@ -21,7 +21,7 @@ How to use? <br />
     In a protected folder (like "ProgramFiles") you have to start this program in admin mode!
 3. Press OK and wait until you will hopefully be happy :)
 
-Options Info: <br />
+Option Info: <br />
 Parsing full demofile: This option is recommended for old demofiles (CS 1.6 etc.),
 because it was able to record into the same file when a mapchange occur. So the hole
 file have to be read to detect all played maps in one file. This was fixed in newer
