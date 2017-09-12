@@ -397,10 +397,11 @@ class DemoFileRenamer(threading.Thread):
 
         # INIT VARIABLES ---------------------------------------------------------------------------
         mapname = ""
-        all_mapnames = []
+        all_mapnames = [] # for option "Parsing full demofile"
         file_failed = ""
+        
 
-        count_index = 0 # for all_mapnames
+        count_index = 0 # for option "Parsing full demofile"
         count_gauge_prg = 0
         count_file_failed = 0
 
@@ -444,12 +445,13 @@ class DemoFileRenamer(threading.Thread):
 
             # START: HANDLE RESULT (PREPARE VAR, RENAME FILE, EXCEPTION HANDLING) ------------------
             if self.CheckBoxSelection is True:
-                mapname = '+'.join(all_mapnames)
+                if all_mapnames:
+                    mapname = '+'.join(all_mapnames)
                 del all_mapnames[:]
                 count_index = 0
 
             if mapname is not None:
-                if all_mapnames is not None:
+                if all_mapnames:
                     for n in all_mapnames:
                         mapname = mapname + n
                 demoname, ext = os.path.splitext(file_source)
@@ -495,7 +497,7 @@ class DemoFileRenamer(threading.Thread):
                     return
             else:
                 file_failed = file_failed + file_source + '\n'
-                file_failed_count += 1
+                count_file_failed += 1
             count_gauge_prg += 1
 
             evt = GaugeProgressEvent(myEVT_GAUGEPROGRESS, -1, count_gauge_prg)
@@ -519,7 +521,7 @@ class DemoFileRenamer(threading.Thread):
             else:
                 logfile = open(logfile_name + logfile_ext, 'x').write(logfile_text)
 
-            evt = FinishFailedEvent(myEVT_FINISHFAILED, -1, logfile_name, logfile_ext, countfile_failed)
+            evt = FinishFailedEvent(myEVT_FINISHFAILED, -1, logfile_name, logfile_ext, count_file_failed)
             wx.PostEvent(self._parent, evt)
 
             print("Files failed to rename: " + str(count_file_failed) + " of " + str(demofileCount) + \
